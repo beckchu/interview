@@ -1,0 +1,140 @@
+#include<queue>
+#include<vector>
+#include<unordered_map>
+#include<set>
+#include<iostream>
+
+using namespace std;
+//堆的实现
+class element {
+public:
+	element(int d):data(d){}
+
+	int data;
+};
+
+class heap {
+public:
+	heap(){
+		elem.emplace_back(nullptr);
+	}
+	~heap() {
+		if (elem.size() != 0) {
+			for (auto e : elem) {
+				delete e;
+			}
+		}
+	}
+
+	void insert(int a) {
+		elem.emplace_back(new element(a));
+		heapfiy(1);
+	}
+
+	void build_heap() {//建堆是从最后一个非叶子节点开始的，所以heapfiy才可以那样写
+		for (int i = elem.size() / 2; i >= 1; i--) {
+			heapfiy(i);
+		}
+	}
+
+	void heap_sort() {
+		build_heap();
+		while (elem.size()) {
+
+		}
+	}
+private:
+	void heapfiy(int parent) {
+		int left, right, max;
+		while (true) {
+			left = parent * 2;
+			right = left + 1;
+
+			max = parent;
+			if (left < elem.size() && elem[max]->data < elem[left]->data) {
+				max = left;
+			}
+			if (right < elem.size() && elem[max]->data < elem[right]->data) {
+				max = right;
+			}
+			if (max == parent) break;
+			swap(max, parent);
+			parent = max;
+		}
+	}
+
+private:
+	vector<element*> elem;
+};
+
+//无向图
+class Graph {
+public:
+	void insert(int node1, int node2) {
+		adj[node1].emplace_back(node2);//emplace_back(contruct) vs push_back(move or copy)
+		adj[node2].emplace_back(node1);
+	}
+
+	void bfs(int s, int t) {
+		if (s == t) return;
+		prev.clear();
+		visited.clear();
+		visited[s] = true;
+		queue<int> q;
+		q.push(s);
+		prev.clear();
+		while (!q.empty()) {
+			int cur = q.front(); q.pop();
+
+			for (int node:adj[cur]) {
+				if (!visited[node]) {
+					prev[node] = cur;
+					if (t == node) {
+						print(prev, s, t);
+						return;
+					}
+					q.push(node);
+					visited[node] = true;
+				}
+			}	
+		}
+	}
+
+	void dfs(int s, int t) {
+		visited.clear();
+		prev.clear();
+		bool found = false;
+		backtrace(s, t, found);
+		print(prev, s, t);
+	}
+
+private:
+	//递归会有重复计算，用visited规避
+	void backtrace(int cur, int t,int found) {
+		if (found == true) return;
+		visited[cur] = true;
+		if (cur == t) {
+			found = true;
+			return;
+		} 
+		for (int node : adj[cur]) {
+			if (!visited[node]) {
+				prev[node] = cur;//不断的被覆盖
+				backtrace(node, t,found);
+			}
+			
+		}
+	}
+
+	void print(unordered_map<int,int> mp,int s,int t) {
+		if (t != s) {
+			print(mp, s, mp[t]);
+		}
+		cout << t << " " << endl;
+	}
+
+private:
+	unordered_map<int, bool> visited;//规避重复计算，dfs and bfs
+	unordered_map<int, int> prev;//记录上一个节点
+	unordered_map<int, vector<int>> adj;//无向邻接表
+};
